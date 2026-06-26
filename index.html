@@ -1,429 +1,384 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Red Integradora — Tecnologías y sociedad</title>
-<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Architects Daughter',cursive;background:#f5f5f0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-#topbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:#ffffff;border-bottom:1px solid #ddd;flex-shrink:0}
-.bdg{font-size:13px;padding:4px 12px;border-radius:20px;font-weight:700;font-family:'Architects Daughter',cursive}
-.bp{background:#E6F1FB;color:#0C447C}
-.ba{background:#EAF3DE;color:#27500A}
-.bw{background:#FAEEDA;color:#633806}
-.bs{background:#D4EDDA;color:#155724}
-.sep{width:1px;height:22px;background:#ddd}
-button{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 12px;border:1px solid #ccc;border-radius:8px;background:#ffffff;cursor:pointer;color:#222}
-button:hover{background:#f0f0f0}
-input{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:8px;color:#222;background:#fff}
-#canvas-wrap{flex:1;overflow:hidden;position:relative;background:#ffffff}
-canvas{display:block;background:#ffffff;touch-action:none}
-#bottombar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 12px;background:#ffffff;border-top:1px solid #ddd;flex-shrink:0}
-.sbox{font-size:12px;color:#666;padding:4px 10px;border:1px solid #ddd;border-radius:8px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:#fafafa}
-.sbox b{font-family:monospace;letter-spacing:1px;color:#222}
-#status{font-size:12px;color:#888;margin-left:auto}
-#overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:100}
-#modal{background:#ffffff;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;font-family:'Architects Daughter',cursive}
-#modal h2{font-size:20px;margin-bottom:0.75rem;color:#1a2740}
-#modal p{font-size:14px;color:#555;margin-bottom:1.25rem;line-height:1.6}
-#modal input{width:100%;font-size:18px;text-align:center;padding:10px;margin-bottom:0.75rem;border:2px solid #ddd;border-radius:10px;font-family:'Architects Daughter',cursive;color:#222;background:#fff}
-#modal .btns{display:flex;gap:10px;justify-content:center}
-#modal button{font-size:14px;padding:8px 20px}
-#modal button.primary{background:#1A6BB5;color:#fff;border-color:#1A6BB5}
-#modal button.primary:hover{background:#155a9a}
-#errMsg{color:#c0392b;font-size:13px;margin-top:6px;min-height:18px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Integradora — Tecnologías y sociedad</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
+    
+    <script type="text/javascript" href="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Architects Daughter', cursive;
+        }
+
+        /* Fondo de hoja de cuaderno rayada mediante CSS */
+        #network-container {
+            width: 100%;
+            height: 100%;
+            background-color: #fffef9;
+            background-image: linear-gradient(#e8e6e0 1px, transparent 1px);
+            background-size: 100% 28px;
+            position: relative;
+        }
+
+        /* Interfaz de usuario superior fija */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: #0a2f60;
+            margin: 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .counter-badge {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #1a6bb5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #0a2f60;
+            width: fit-content;
+            pointer-events: auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #reset-btn {
+            background: #fff;
+            border: 2px solid #c97b0a;
+            color: #6b3800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Architects Daughter', cursive;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: auto;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            align-self: flex-start;
+        }
+
+        #reset-btn:hover {
+            background: #fde8c8;
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
 
-<div id="topbar">
-  <span id="rbdg" class="bdg bp">Presentador</span>
-  <div class="sep"></div>
-  <button onclick="zm(1.13)">+</button>
-  <button onclick="zm(0.88)">−</button>
-  <button onclick="rv()">Restablecer</button>
-  <div class="sep"></div>
-  <button onclick="toggleRole()" id="btnR">👁 Modo audiencia</button>
-  <div class="sep"></div>
-  <span id="syncbdg" class="bdg bw">● Conectando…</span>
-</div>
-
-<div id="canvas-wrap">
-  <canvas id="cv"></canvas>
-</div>
-
-<div id="bottombar">
-  <div class="sbox" onclick="cpCode()">Sesión: <b id="sc">----</b> 📋</div>
-  <span style="font-size:12px;color:#888">unirse:</span>
-  <input type="text" id="ji" placeholder="Código…" style="width:90px" maxlength="6"/>
-  <button onclick="joinS()">Unirse →</button>
-  <span id="status">Iniciando…</span>
-</div>
-
-<div id="overlay">
-  <div id="modal">
-    <div id="viewMain">
-      <h2>Red Integradora</h2>
-      <p>¿Cómo querés ingresar?</p>
-      <div class="btns">
-        <button class="primary" onclick="showPresenterForm()">Soy presentador</button>
-        <button onclick="showJoin()">Soy audiencia</button>
-      </div>
+    <div id="ui-layer">
+        <h1>Tecnologías y sociedad</h1>
+        <div class="counter-badge" id="counter">Nodos descubiertos: 1 / 44</div>
+        <button id="reset-btn" onclick="initNetwork()">Reiniciar Red</button>
     </div>
 
-    <div id="viewPresenter" style="display:none">
-      <h2>Acceso presentador</h2>
-      <p>Ingresá la contraseña para continuar:</p>
-      <input type="password" id="passInput" placeholder="Contraseña…" onkeydown="if(event.key==='Enter')checkPass()"/>
-      <div id="errMsg"></div>
-      <div class="btns">
-        <button onclick="showMain()">Volver</button>
-        <button class="primary" onclick="checkPass()">Ingresar</button>
-      </div>
-    </div>
+    <div id="network-container"></div>
 
-    <div id="viewJoin" style="display:none">
-      <h2>Unirse como audiencia</h2>
-      <p>Ingresá el código de sesión que te compartió el presentador:</p>
-      <input type="text" id="joinCode" placeholder="Ej: AB3KZ" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:22px;font-family:monospace" onkeydown="if(event.key==='Enter')startAudience()"/>
-      <div class="btns" style="margin-top:0.75rem">
-        <button onclick="showMain()">Volver</button>
-        <button class="primary" onclick="startAudience()">Unirse</button>
-      </div>
-    </div>
-  </div>
-</div>
+    <script>
+        // --- 1. BASE DE DATOS MAESTRA DE NODOS (1 al 44) ---
+        const rawNodes = [
+            { id: 1, label: "Tecnologia", group: "orange" },
+            { id: 2, label: "Recurso educativo indispensable", group: "orange" },
+            { id: 3, label: "TICS", group: "orange" },
+            { id: 4, label: "Tecnología de la comunicación", group: "orange" },
+            { id: 5, label: "Red", group: "orange" },
+            { id: 6, label: "Motivar, aprendizaje.\nDewey", group: "orange" },
+            { id: 7, label: "● Indagación\n● Comunicación\n● Construcción\n● Expresión", group: "orange" },
+            { id: 8, label: "Visión\nMultifacética", group: "orange" },
+            { id: 9, label: "Sueño tecnocrático (la tecnología presentará límites)", group: "orange" },
+            { id: 10, label: "Tecnología como:\n● Panacea\n● Herramienta\n● Herramienta no neutral", group: "empty" },
+            { id: 11, label: "Instrumental vs. Relacional", group: "orange" },
+            { id: 12, label: "Relación Bidireccional", group: "orange" },
+            { id: 13, label: "Líneas de desarrollo inconcebibles", group: "orange" },
+            { id: 14, label: "Promesas de riesgo,\nriesgos promisorios.", group: "orange" },
+            { id: 15, label: "Espacio público", group: "orange" },
+            { id: 16, label: "Ciberespacio", group: "orange" },
+            { id: 17, label: "Inteligencia\nen red", group: "green" },
+            { id: 18, label: "Acceso =\nOportunidad", group: "green" },
+            { id: 19, label: "Aprendizaje activo", group: "blue" },
+            { id: 20, label: "Democracia particular", group: "purple" },
+            { id: 21, label: "Saber no centralizado", group: "purple" },
+            { id: 22, label: "Conexión = cuidado", group: "purple" },
+            { id: 23, label: "Elogio de lo humano", group: "purple" },
+            { id: 24, label: "Vigilancia constante", group: "green" },
+            { id: 25, label: "Interconexión", group: "green" },
+            { id: 26, label: "No reemplaza ≠ Se integra críticamente", group: "blue" },
+            { id: 27, label: "Uso estratégico", group: "outline" },
+            { id: 28, label: "Apoyos", group: "outline" },
+            { id: 29, label: "Inteligencia\nextensible", group: "green" },
+            { id: 30, label: "Suplementar\ncapacidades", group: "green" },
+            { id: 31, label: "Vivirmundo\n= otra mentalidad", group: "purple" },
+            { id: 32, label: "Tecnológicamente", group: "green" },
+            { id: 33, label: "Socialmente", group: "green" },
+            { id: 34, label: "● Conocimiento\n● Memoria\n● Procesamiento", group: "green" },
+            { id: 35, label: "Aprendizaje\nColaborativo\nCooperativo", group: "blue" },
+            { id: 36, label: "Construcción\ndinámica del aula", group: "blue" },
+            { id: 37, label: "Estudiante autónomo\nDocente = acompañante cognitivo", group: "blue" },
+            { id: 38, label: "Estudiante ≠ Pasajero", group: "purple" },
+            { id: 39, label: "Conductor", group: "purple" },
+            { id: 40, label: "Personificación del aprendizaje", group: "blue" },
+            { id: 41, label: "Aula invertida\nEstructura extra escolar", group: "blue" },
+            { id: 42, label: "Tiempo áulico resignificado", group: "blue" },
+            { id: 43, label: "Integración de saberes > fragmentación", group: "purple" },
+            { id: 44, label: "Ubicuidad temporal\nUbicuidad en sentido práctico", group: "green" }
+        ];
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyCwjw1FmwUQ0ZEv-wCAaGoRJi3eXSDDmok",
-  authDomain: "nodos-8b81e.firebaseapp.com",
-  databaseURL: "https://nodos-8b81e-default-rtdb.firebaseio.com",
-  projectId: "nodos-8b81e",
-  storageBucket: "nodos-8b81e.firebasestorage.app",
-  messagingSenderId: "36302586707",
-  appId: "1:36302586707:web:190d5ee297a308aa4f57a6"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-window._fbSet = (path, data) => set(ref(db, path), data);
-window._fbOn  = (path, cb)   => onValue(ref(db, path), snap => cb(snap.val()));
-window._fbReady = true;
-window.dispatchEvent(new Event('fbready'));
-</script>
+        // --- 2. BASE DE DATOS MAESTRA DE CONEXIONES ---
+        // Se definen explícitamente las visibles e invisibles usando el mapeo numérico
+        const rawEdges = [
+            // Visibles originales mapeadas numéricamente
+            { from: 1, to: 2, arrows: "to" },
+            { from: 1, to: 3, arrows: "to" },
+            { from: 3, to: 4, arrows: "to" },
+            { from: 4, to: 5, arrows: "to" },
+            { from: 1, to: 6, arrows: "to" },
+            { from: 5, to: 15, arrows: "to" },
+            { from: 15, to: 16, arrows: "to" },
+            { from: 16, to: 17, arrows: "to" },
+            { from: 17, to: 18, arrows: "to" },
+            { from: 18, to: 19, arrows: "to" },
+            { from: 18, to: 21, arrows: "to" },
+            { from: 5, to: 26, arrows: "to" },
+            { from: 26, to: 27, arrows: "to" },
+            { from: 27, to: 28, arrows: "to" },
+            { from: 28, to: 30, arrows: "to" },
+            { from: 17, to: 24, arrows: "to" },
+            { from: 24, to: 25, arrows: "to" },
+            { from: 25, to: 29, arrows: "to" },
+            { from: 5, to: 22, arrows: "to" },
+            { from: 22, to: 23, arrows: "to" },
+            { from: 30, to: 31, arrows: "to" },
+            { from: 30, to: 32, arrows: "to" },
+            { from: 30, to: 33, arrows: "to" },
+            { from: 32, to: 34, arrows: "to" },
+            { from: 33, to: 35, arrows: "to" },
+            { from: 9, to: 14, arrows: "to" },
+            { from: 11, to: 12, arrows: "to" },
+            { from: 11, to: 13, arrows: "to" },
+            { from: 8, to: 18, arrows: "to" },
+            { from: 36, to: 37, arrows: "to" },
+            { from: 36, to: 41, arrows: "to" },
+            { from: 38, to: 39, arrows: "to" },
+            { from: 41, to: 42, arrows: "to" },
+            { from: 42, to: 44, arrows: "to" },
+            { from: 42, to: 43, arrows: "to" },
+            { from: 21, to: 36, arrows: "to" },
+            { from: 19, to: 36, arrows: "to" },
+            { from: 29, to: 36, arrows: "to" },
+            { from: 1, to: 9, arrows: "to" },
+            { from: 9, to: 10, arrows: "to" },
+            { from: 10, to: 11, arrows: "to" },
 
-<script>
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-let sc=1, ox=0, oy=0, drag=null, pan=false, ps=null;
-let audience=false, sessionCode='', pushTimer=null;
+            // CONEXIONES INVISIBLES (Antigua Proximidad -> Ahora flotantes físicas con Opacity: 0)
+            { from: 6, to: 7, arrows: "", color: { opacity: 0 } },
+            { from: 17, to: 20, arrows: "", color: { opacity: 0 } },
+            { from: 20, to: 29, arrows: "", color: { opacity: 0 } },
+            { from: 37, to: 38, arrows: "", color: { opacity: 0 } },
+            { from: 37, to: 40, arrows: "", color: { opacity: 0 } }
+        ];
 
-const PASS = 'mundial';
+        let network = null;
+        let visibleNodeIds = new Set();
+        let nodesDataSet = null;
+        let edgesDataSet = null;
 
-const CLR = {
-  orange: {f:'#FDE8C8', s:'#C97B0A', t:'#6B3800'},
-  blue:   {f:'#C8DDF5', s:'#1A6BB5', t:'#0A2F60'},
-  green:  {f:'#C8E6C4', s:'#2E7A2C', t:'#133D12'},
-  purple: {f:'#DDD5F0', s:'#6035A8', t:'#301768'},
-  outline:{f:'rgba(255,255,255,0.9)', s:'#1A6BB5', t:'#0A2F60'},
-  empty:  {f:'rgba(255,255,255,0.9)', s:'#777', t:'#333'},
-};
+        function initNetwork() {
+            // El estado inicial solo contiene el nodo principal "Tecnologia" (ID: 1)
+            visibleNodeIds = new Set([1]);
 
-function nd(id,x,y,w,h,label,color){return{id,x,y,w,h,label,color};}
-const NODES=[
-  nd('titulo',      100,  30, 380,  52,'Tecnologías y sociedad','_title'),
-  nd('tec',         100, 120, 190,  56,'Tecnologia','orange'),
-  nd('rec',         370, 100, 320,  56,'Recurso educativo indispensable','orange'),
-  nd('tics',        100, 220, 115,  56,'TICS','orange'),
-  nd('tcomunic',    285, 210, 270,  56,'Tecnología de la comunicación','orange'),
-  nd('red',         625, 210,  95,  56,'Red','orange'),
-  nd('motdewey',     90, 330, 200,  72,'Motivar, aprendizaje.\nDewey','orange'),
-  nd('dewbul',       90, 450, 200, 128,'● Indagación\n● Comunicación\n● Construcción\n● Ex:presión','orange'),
-  nd('vision',      355, 350, 175,  72,'Visión\nMultifacética','orange'),
-  nd('sueño',        90, 620, 415,  56,'Sueño tecnocrático (la tecnología presentará límites)','orange'),
-  nd('teccomo',      90, 710, 235, 128,'Tecnología como:\n● Panacea\n● Herramienta\n● Herramienta no neutral','empty'),
-  nd('instrrel',    380, 720, 245,  56,'Instrumental vs. Relacional','orange'),
-  nd('relbid',      690, 720, 190,  72,'Relación Bidireccional','orange'),
-  nd('lineas',      160, 880, 285,  56,'Líneas de desarrollo inconcebibles','orange'),
-  nd('promesas',    580, 610, 220,  72,'Promesas de riesgo,\nriesgos promisorios.','orange'),
-  nd('espacio',     510, 320, 180,  56,'Espacio público','orange'),
-  nd('ciber',       760, 320, 170,  56,'Ciberespacio','orange'),
-  nd('intred',      740, 420, 180,  72,'Inteligencia\nen red','green'),
-  nd('acceso',      510, 440, 170,  72,'Acceso =\nOportunidad','green'),
-  nd('aprendact',   560, 570, 180,  56,'Aprendizaje activo','blue'),
-  nd('demopart',    760, 520, 210,  56,'Democracia particular','purple'),
-  nd('sabernoce',   510, 670, 235,  56,'Saber no centralizado','purple'),
-  nd('conexcuid',   950, 280, 245,  56,'Conexión = cuidado','purple'),
-  nd('elogio',     1260, 280, 220,  56,'Elogio de lo humano','purple'),
-  nd('vigilanc',    990, 380, 210,  56,'Vigilancia constante','green'),
-  nd('intercon',    990, 480, 180,  56,'Interconexión','green'),
-  nd('noreempl',    860, 120, 380,  56,'No reemplaza ≠ Se integra críticamente','blue'),
-  nd('usoest',      860, 220, 190,  56,'Uso estratégico','outline'),
-  nd('apoyos',     1110, 220, 140,  56,'Apoyos','outline'),
-  nd('intextens',  1220, 420, 210,  72,'Inteligencia\nextensible','green'),
-  nd('suplcap',    1360, 180, 210,  72,'Suplementar\ncapacidades','green'),
-  nd('vivirmund',  1640, 130, 210,  88,'Vivir en otro mundo\n= otra mentalidad','purple'),
-  nd('tecnolog2',  1360, 295, 210,  56,'Tecnológicamente','green'),
-  nd('social',     1360, 395, 160,  56,'Socialmente','green'),
-  nd('conocbul',   1640, 275, 190,  88,'● Conocimiento\n● Memoria\n● Procesamiento','green'),
-  nd('aprcool',    1640, 400, 190,  88,'Aprendizaje\nColaborativo\nCooperativo','blue'),
-  nd('construc',   1060, 570, 235,  72,'Construcción\ndinámica del aula','blue'),
-  nd('estaut',     1360, 540, 325,  72,'Estudiante autónomo\nDocente = acompañante cognitivo','blue'),
-  nd('estpas',     1360, 650, 235,  56,'Estudiante ≠ Pasajero','purple'),
-  nd('conductor',  1660, 650, 160,  56,'Conductor','purple'),
-  nd('personif',   1360, 745, 275,  56,'Personificación del aprendizaje','blue'),
-  nd('aulainv',    1060, 690, 255,  72,'Aula invertida\nEstructura extra escolar','blue'),
-  nd('tiempaul',   1060, 810, 295,  56,'Tiempo áulico resignificado','blue'),
-  nd('intgsab',     870, 900, 315,  56,'Integración de saberes > fragmentación','purple'),
-  nd('ubicut',     1410, 810, 315,  72,'Ubicuidad temporal\nUbicuidad en sentido práctico','green'),
-];
+            // Filtrar colecciones iniciales
+            const initialNodes = rawNodes.filter(n => visibleNodeIds.has(n.id));
+            const initialEdges = []; // Al inicio no hay flechas porque solo hay 1 nodo visible
 
-const EDGES=[
-  ['tec','rec'],['tec','tics'],['tics','tcomunic'],['tcomunic','red'],
-  ['tec','motdewey'],['motdewey','dewbul'],
-  ['red','espacio'],['espacio','ciber'],['ciber','intred'],
-  ['intred','acceso'],['acceso','aprendact'],['acceso','demopart'],['acceso','sabernoce'],
-  ['red','noreempl'],['noreempl','usoest'],['usoest','apoyos'],['apoyos','suplcap'],
-  ['intred','vigilanc'],['vigilanc','intercon'],['intercon','intextens'],
-  ['red','conexcuid'],['conexcuid','elogio'],
-  ['suplcap','vivirmund'],['suplcap','tecnolog2'],['suplcap','social'],
-  ['tecnolog2','conocbul'],['social','aprcool'],
-  ['sueño','promesas'],['instrrel','relbid'],['instrrel','lineas'],
-  ['vision','acceso'],['demopart','intextens'],
-  ['construc','estaut'],['construc','aulainv'],
-  ['estpas','conductor'],['aulainv','tiempaul'],
-  ['tiempaul','ubicut'],['tiempaul','intgsab'],
-  ['sabernoce','construc'],['aprendact','construc'],
-  ['intextens','construc'],['sueño','teccomo'],
-];
+            nodesDataSet = new vis.DataSet(initialNodes);
+            edgesDataSet = new vis.DataSet(initialEdges);
 
-function resize(){cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;rv();}
-window.addEventListener('resize',resize);
+            const container = document.getElementById('network-container');
+            const data = { nodes: nodesDataSet, edges: edgesDataSet };
 
-function ctr(n){return{x:n.x+n.w/2,y:n.y+n.h/2};}
-function edgePts(a,b){
-  const ac=ctr(a),bc=ctr(b);
-  const dx=bc.x-ac.x,dy=bc.y-ac.y,len=Math.sqrt(dx*dx+dy*dy);
-  if(len<1)return null;
-  const ux=dx/len,uy=dy/len,pad=12;
-  const t1=Math.min((a.w/2+pad)/Math.max(Math.abs(ux),0.01),(a.h/2+pad)/Math.max(Math.abs(uy),0.01));
-  const t2=Math.min((b.w/2+pad)/Math.max(Math.abs(ux),0.01),(b.h/2+pad)/Math.max(Math.abs(uy),0.01));
-  return{sx:ac.x+ux*t1,sy:ac.y+uy*t1,ex:bc.x-ux*t2,ey:bc.y-uy*t2,ux,uy};
-}
-function wrapL(text,maxW){
-  const raw=text.split('\n'),out=[];
-  for(const line of raw){
-    if(ctx.measureText(line).width<=maxW){out.push(line);continue;}
-    const ws=line.split(' ');let cur='';
-    for(const w of ws){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}else cur=t;}
-    if(cur)out.push(cur);
-  }
-  return out;
-}
-function drawNode(n){
-  if(n.color==='_title'){
-    const fs=Math.round(22*sc);
-    ctx.font=`${fs}px 'Architects Daughter',cursive`;
-    ctx.fillStyle='#1a2740';ctx.textAlign='left';ctx.textBaseline='middle';
-    const tx=n.x*sc+ox,ty=(n.y+n.h/2)*sc+oy;
-    ctx.fillText(n.label,tx,ty);
-    const tw=ctx.measureText(n.label).width;
-    ctx.beginPath();ctx.moveTo(tx,ty+15*sc);ctx.lineTo(tx+tw,ty+15*sc);
-    ctx.strokeStyle='#1a2740';ctx.lineWidth=2;ctx.stroke();
-    return;
-  }
-  const wx=n.x*sc+ox,wy=n.y*sc+oy,ww=n.w*sc,wh=n.h*sc;
-  const c=CLR[n.color];
-  const r=Math.min(14*sc,wh/2);
-  ctx.beginPath();ctx.roundRect(wx,wy,ww,wh,r);
-  ctx.fillStyle=c.f;ctx.fill();
-  ctx.strokeStyle=c.s;ctx.lineWidth=2;ctx.stroke();
-  const fsize=Math.max(11,Math.round(14*sc));
-  ctx.font=`${fsize}px 'Architects Daughter',cursive`;
-  ctx.fillStyle=c.t;ctx.textAlign='center';ctx.textBaseline='middle';
-  const pad=16*sc;
-  const lines=wrapL(n.label,ww-pad*2);
-  const lh=Math.round(fsize*1.28);
-  const totalH=(lines.length-1)*lh;
-  const sy=wy+wh/2-totalH/2;
-  lines.forEach((l,i)=>ctx.fillText(l,wx+ww/2,sy+i*lh));
-}
-function drawArrow(sx,sy,ex,ey,ux,uy){
-  const al=9*sc,aw=4.5*sc;
-  const ssx=sx*sc+ox,ssy=sy*sc+oy,eex=ex*sc+ox,eey=ey*sc+oy;
-  ctx.beginPath();ctx.moveTo(ssx,ssy);ctx.lineTo(eex,eey);
-  ctx.strokeStyle='#1a3a6b';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(eex,eey);
-  ctx.lineTo(eex-al*ux+aw*uy,eey-al*uy-aw*ux);
-  ctx.lineTo(eex-al*ux-aw*uy,eey-al*uy+aw*ux);
-  ctx.closePath();ctx.fillStyle='#1a3a6b';ctx.fill();
-}
-function draw(){
-  ctx.clearRect(0,0,cv.width,cv.height);
-  for(const [aid,bid] of EDGES){
-    const a=NODES.find(n=>n.id===aid),b=NODES.find(n=>n.id===bid);
-    if(!a||!b)continue;
-    const ep=edgePts(a,b);
-    if(ep)drawArrow(ep.sx,ep.sy,ep.ex,ep.ey,ep.ux,ep.uy);
-  }
-  for(const n of NODES)drawNode(n);
-}
-function hit(px,py){
-  for(let i=NODES.length-1;i>=0;i--){
-    const n=NODES[i];if(n.color==='_title')continue;
-    const nx=n.x*sc+ox,ny=n.y*sc+oy;
-    if(px>=nx&&px<=nx+n.w*sc&&py>=ny&&py<=ny+n.h*sc)return n;
-  }
-  return null;
-}
-function gp(e){
-  const r=cv.getBoundingClientRect(),sw=cv.width/r.width,sh=cv.height/r.height;
-  const src=e.touches?e.touches[0]:e;
-  return{x:(src.clientX-r.left)*sw,y:(src.clientY-r.top)*sh};
-}
-cv.addEventListener('mousedown',e=>{
-  if(audience)return;
-  const{x,y}=gp(e);const n=hit(x,y);
-  if(n){drag={nd:n,ox:x-n.x*sc-ox,oy:y-n.y*sc-oy};cv.style.cursor='grabbing';}
-  else{pan=true;ps={x,y,ox,oy};cv.style.cursor='grab';}
-});
-cv.addEventListener('mousemove',e=>{
-  const{x,y}=gp(e);
-  if(drag){drag.nd.x=(x-drag.ox-ox)/sc;drag.nd.y=(y-drag.oy-oy)/sc;draw();schedulePush();}
-  else if(pan){ox=ps.ox+(x-ps.x);oy=ps.oy+(y-ps.y);draw();}
-});
-cv.addEventListener('mouseup',()=>{drag=null;pan=false;cv.style.cursor='default';pushNow();});
-cv.addEventListener('mouseleave',()=>{drag=null;pan=false;});
-cv.addEventListener('wheel',e=>{e.preventDefault();zm(e.deltaY<0?1.1:0.91);},{passive:false});
-cv.addEventListener('touchstart',e=>{
-  e.preventDefault();if(audience)return;
-  const{x,y}=gp(e);const n=hit(x,y);
-  if(n)drag={nd:n,ox:x-n.x*sc-ox,oy:y-n.y*sc-oy};
-  else{pan=true;ps={x,y,ox,oy};}
-},{passive:false});
-cv.addEventListener('touchmove',e=>{
-  e.preventDefault();const{x,y}=gp(e);
-  if(drag){drag.nd.x=(x-drag.ox-ox)/sc;drag.nd.y=(y-drag.oy-oy)/sc;draw();schedulePush();}
-  else if(pan){ox=ps.ox+(x-ps.x);oy=ps.oy+(y-ps.y);draw();}
-},{passive:false});
-cv.addEventListener('touchend',()=>{drag=null;pan=false;pushNow();});
+            // Opciones de configuración global de Vis.js adaptada a la estética requerida
+            const options = {
+                nodes: {
+                    shape: 'box',
+                    margin: { top: 12, bottom: 12, left: 16, right: 16 }, // Padding compacto para rellenar el nodo
+                    font: {
+                        face: 'Architects Daughter',
+                        size: 17,
+                        multi: 'md'
+                    },
+                    borderWidth: 2,
+                    borderWidthSelected: 4,
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.08)',
+                        size: 4,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    color: {
+                        color: '#2a4a8a',
+                        highlight: '#1a6bb5',
+                        hover: '#1a6bb5'
+                    },
+                    smooth: {
+                        type: 'quadraticBezier', // Curvas estéticas del diseño original
+                        roundness: 0.3
+                    },
+                    width: 2
+                },
+                groups: {
+                    orange: {
+                        background: '#FDE8C8',
+                        border: '#C97B0A',
+                        font: { color: '#6B3800' },
+                        shapeProperties: { borderRadius: 6 }
+                    },
+                    blue: {
+                        background: '#C8DDF5',
+                        border: '#1A6BB5',
+                        font: { color: '#0A2F60' },
+                        shapeProperties: { borderRadius: 6 }
+                    },
+                    green: {
+                        background: '#C8E6C4',
+                        border: '#2E7A2C',
+                        font: { color: '#133D12' },
+                        shapeProperties: { borderRadius: 6 }
+                    },
+                    purple: {
+                        background: '#DDD5F0',
+                        border: '#6035A8',
+                        font: { color: '#301768' },
+                        shapeProperties: { borderRadius: 6 }
+                    },
+                    outline: {
+                        background: 'rgba(255,255,255,0.92)',
+                        border: '#1A6BB5',
+                        font: { color: '#0A2F60' },
+                        shapeProperties: { borderRadius: 6 }
+                    },
+                    empty: {
+                        background: 'rgba(255,255,255,0.92)',
+                        border: '#888888',
+                        font: { color: '#333333' },
+                        shapeProperties: { borderRadius: 6 }
+                    }
+                },
+                interaction: {
+                    hover: true,
+                    dragNodes: true, // Habilitado para permitir reorganizar si el usuario quiere
+                    zoomView: true,
+                    dragView: true
+                },
+                physics: {
+                    enabled: true,
+                    barnesHut: {
+                        gravitationalConstant: -2500, // Fuerza de repulsión mutua para evitar colisiones
+                        centralGravity: 0.2,
+                        springLength: 140, // Mantiene a los hijos cerca de sus padres
+                        springConstant: 0.04,
+                        damping: 0.09,
+                        avoidOverlap: 1 // Máxima prioridad a no encimarse
+                    },
+                    stabilization: {
+                        enabled: true,
+                        iterations: 100
+                    }
+                }
+            };
 
-function zm(f){const cx=cv.width/2,cy=cv.height/2;ox=(ox-cx)*f+cx;oy=(oy-cy)*f+cy;sc*=f;draw();}
-function rv(){
-  const W=1900,H=1000,sx=cv.width/W,sy=cv.height/H;
-  sc=Math.min(sx,sy)*0.88;
-  ox=(cv.width-W*sc)/2;oy=(cv.height-H*sc)/2;draw();
-}
+            // Inicializar la red interactiva
+            network = new vis.Network(container, data, options);
+            updateCounter();
 
-function schedulePush(){clearTimeout(pushTimer);pushTimer=setTimeout(pushNow,80);}
-function pushNow(){
-  if(audience||!sessionCode||!window._fbSet)return;
-  const pos={};
-  NODES.forEach(n=>{if(n.color!=='_title')pos[n.id]={x:n.x,y:n.y};});
-  window._fbSet('sessions/'+sessionCode+'/positions',pos).catch(()=>{});
-}
-function listenSession(code){
-  if(!window._fbOn)return;
-  window._fbOn('sessions/'+code+'/positions',data=>{
-    if(!data||!audience)return;
-    NODES.forEach(n=>{if(data[n.id]){n.x=data[n.id].x;n.y=data[n.id].y;}});
-    draw();
-  });
-}
+            // Evento Click para la Lógica de Aparición Progresiva
+            network.on("click", function (params) {
+                if (params.nodes.length > 0) {
+                    const clickedNodeId = params.nodes[0];
+                    revealNeighbors(clickedNodeId);
+                }
+            });
+        }
 
-function toggleRole(){
-  audience=!audience;
-  document.getElementById('rbdg').textContent=audience?'Audiencia':'Presentador';
-  document.getElementById('rbdg').className='bdg '+(audience?'ba':'bp');
-  document.getElementById('btnR').textContent=audience?'🎤 Modo presentador':'👁 Modo audiencia';
-  cv.style.cursor='default';
-}
-function cpCode(){
-  if(!sessionCode)return;
-  navigator.clipboard?.writeText(sessionCode);
-  const el=document.getElementById('sc'),orig=el.textContent;
-  el.textContent='¡Copiado!';setTimeout(()=>el.textContent=orig,1200);
-}
-function joinS(){
-  const code=document.getElementById('ji').value.toUpperCase().trim();
-  if(!code)return;
-  sessionCode=code;
-  document.getElementById('sc').textContent=code;
-  if(!audience)toggleRole();
-  document.getElementById('syncbdg').textContent='● Sesión '+code;
-  document.getElementById('syncbdg').className='bdg bs';
-  listenSession(code);
-}
+        // Función para descubrir los nodos conectados dinámicamente
+        function revealNeighbors(nodeId) {
+            let changesMade = false;
 
-/* ── Modal navigation ── */
-function showMain(){
-  document.getElementById('viewMain').style.display='block';
-  document.getElementById('viewPresenter').style.display='none';
-  document.getElementById('viewJoin').style.display='none';
-  document.getElementById('errMsg').textContent='';
-}
-function showPresenterForm(){
-  document.getElementById('viewMain').style.display='none';
-  document.getElementById('viewPresenter').style.display='block';
-  document.getElementById('passInput').value='';
-  document.getElementById('errMsg').textContent='';
-  setTimeout(()=>document.getElementById('passInput').focus(),100);
-}
-function showJoin(){
-  document.getElementById('viewMain').style.display='none';
-  document.getElementById('viewJoin').style.display='block';
-  setTimeout(()=>document.getElementById('joinCode').focus(),100);
-}
-function checkPass(){
-  const val=document.getElementById('passInput').value.trim().toLowerCase();
-  if(val===PASS){
-    startPresenter();
-  } else {
-    document.getElementById('errMsg').textContent='Contraseña incorrecta. Intentá de nuevo.';
-    document.getElementById('passInput').value='';
-    document.getElementById('passInput').focus();
-  }
-}
-function startPresenter(){
-  sessionCode=Math.random().toString(36).substr(2,5).toUpperCase();
-  document.getElementById('sc').textContent=sessionCode;
-  document.getElementById('syncbdg').textContent='● En vivo · '+sessionCode;
-  document.getElementById('syncbdg').className='bdg bs';
-  document.getElementById('status').textContent='Compartí el código con tu audiencia';
-  document.getElementById('overlay').style.display='none';
-  audience=false;
-  resize();
-}
-function startAudience(){
-  const code=document.getElementById('joinCode').value.toUpperCase().trim();
-  if(!code){alert('Ingresá el código de sesión');return;}
-  sessionCode=code;
-  document.getElementById('sc').textContent=code;
-  document.getElementById('syncbdg').textContent='● Sesión '+code;
-  document.getElementById('syncbdg').className='bdg bs';
-  document.getElementById('status').textContent='Siguiendo sesión '+code;
-  document.getElementById('overlay').style.display='none';
-  audience=true;
-  document.getElementById('rbdg').textContent='Audiencia';
-  document.getElementById('rbdg').className='bdg ba';
-  document.getElementById('btnR').textContent='🎤 Modo presentador';
-  resize();
-  listenSession(code);
-}
+            rawEdges.forEach(edge => {
+                let targetId = null;
+                
+                // Si el nodo clickeado es el origen ("from"), descubrimos el destino ("to")
+                if (edge.from === nodeId) {
+                    targetId = edge.to;
+                }
+                // Si el nodo clickeado es el destino ("to"), descubrimos el origen ("from") por bidireccionalidad de exploración
+                else if (edge.to === nodeId) {
+                    targetId = edge.from;
+                }
 
-function init(){
-  document.getElementById('syncbdg').textContent='● Firebase listo';
-  document.getElementById('syncbdg').className='bdg bs';
-}
-if(window._fbReady){init();}
-else{window.addEventListener('fbready',init);}
+                if (targetId && !visibleNodeIds.has(targetId)) {
+                    visibleNodeIds.add(targetId);
+                    
+                    // Traer la configuración del nodo desde la base maestra
+                    const nodeData = rawNodes.find(n => n.id === targetId);
+                    if (nodeData) {
+                        nodesDataSet.add(nodeData);
+                        changesMade = true;
+                    }
+                }
+            });
 
-document.fonts.ready.then(()=>{if(cv.width>0)draw();});
-</script>
+            // Si se agregaron nuevos nodos, actualizamos los edges que deben renderizarse entre los nodos ahora visibles
+            if (changesMade) {
+                rawEdges.forEach(edge => {
+                    if (visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)) {
+                        // Evitamos duplicar conexiones ya agregadas al DataSet
+                        if (!edgesDataSet.get({
+                            filter: e => (e.from === edge.from && e.to === edge.to)
+                        }).length) {
+                            edgesDataSet.add(edge);
+                        }
+                    }
+                });
+                updateCounter();
+            }
+        }
+
+        function updateCounter() {
+            document.getElementById('counter').innerText = `Nodos descubiertos: ${visibleNodeIds.size} / 44`;
+        }
+
+        // Inicializar al cargar el documento
+        window.onload = () => {
+            initNetwork();
+        };
+    </script>
 </body>
 </html>
