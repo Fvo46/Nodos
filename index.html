@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
     
-    <script type="text/javascript" href="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style>
         * {
@@ -25,13 +25,15 @@
             font-family: 'Architects Daughter', cursive;
         }
 
-        /* Fondo de hoja de cuaderno rayada mediante CSS */
+        /* FONDO OPTIMIZADO: Tono amarillo sutil, líneas grises y margen izquierdo rojo */
         #network-container {
             width: 100%;
             height: 100%;
-            background-color: #fffef9;
-            background-image: linear-gradient(#e8e6e0 1px, transparent 1px);
-            background-size: 100% 28px;
+            background-color: #fff8e7; /* Amarillo sutil de cuaderno/fichero */
+            background-image: 
+                linear-gradient(90deg, transparent 79px, #ff4d4d 79px, #ff4d4d 81px, transparent 81px), /* Margen vertical rojo */
+                linear-gradient(#e2dfd2 1px, transparent 1px); /* Líneas horizontales */
+            background-size: 100% 100%, 100% 28px;
             position: relative;
         }
 
@@ -39,7 +41,7 @@
         #ui-layer {
             position: absolute;
             top: 20px;
-            left: 20px;
+            left: 100px; /* Desplazado para no tapar el margen rojo */
             z-index: 10;
             pointer-events: none;
             display: flex;
@@ -51,7 +53,7 @@
             font-size: 28px;
             color: #0a2f60;
             margin: 0;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
 
         .counter-badge {
@@ -64,7 +66,7 @@
             color: #0a2f60;
             width: fit-content;
             pointer-events: auto;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
         #reset-btn {
@@ -79,7 +81,7 @@
             font-size: 14px;
             pointer-events: auto;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             align-self: flex-start;
         }
 
@@ -100,7 +102,7 @@
     <div id="network-container"></div>
 
     <script>
-        // --- 1. BASE DE DATOS MAESTRA DE NODOS (1 al 44) ---
+        // --- BASE DE DATOS MAESTRA DE NODOS (1 al 44) ---
         const rawNodes = [
             { id: 1, label: "Tecnologia", group: "orange" },
             { id: 2, label: "Recurso educativo indispensable", group: "orange" },
@@ -148,10 +150,8 @@
             { id: 44, label: "Ubicuidad temporal\nUbicuidad en sentido práctico", group: "green" }
         ];
 
-        // --- 2. BASE DE DATOS MAESTRA DE CONEXIONES ---
-        // Se definen explícitamente las visibles e invisibles usando el mapeo numérico
+        // --- BASE DE DATOS MAESTRA DE CONEXIONES ---
         const rawEdges = [
-            // Visibles originales mapeadas numéricamente
             { from: 1, to: 2, arrows: "to" },
             { from: 1, to: 3, arrows: "to" },
             { from: 3, to: 4, arrows: "to" },
@@ -194,7 +194,7 @@
             { from: 9, to: 10, arrows: "to" },
             { from: 10, to: 11, arrows: "to" },
 
-            // CONEXIONES INVISIBLES (Antigua Proximidad -> Ahora flotantes físicas con Opacity: 0)
+            // Conexiones invisibles (Nodos flotantes por proximidad conceptual)
             { from: 6, to: 7, arrows: "", color: { opacity: 0 } },
             { from: 17, to: 20, arrows: "", color: { opacity: 0 } },
             { from: 20, to: 29, arrows: "", color: { opacity: 0 } },
@@ -208,12 +208,10 @@
         let edgesDataSet = null;
 
         function initNetwork() {
-            // El estado inicial solo contiene el nodo principal "Tecnologia" (ID: 1)
             visibleNodeIds = new Set([1]);
 
-            // Filtrar colecciones iniciales
             const initialNodes = rawNodes.filter(n => visibleNodeIds.has(n.id));
-            const initialEdges = []; // Al inicio no hay flechas porque solo hay 1 nodo visible
+            const initialEdges = [];
 
             nodesDataSet = new vis.DataSet(initialNodes);
             edgesDataSet = new vis.DataSet(initialEdges);
@@ -221,106 +219,65 @@
             const container = document.getElementById('network-container');
             const data = { nodes: nodesDataSet, edges: edgesDataSet };
 
-            // Opciones de configuración global de Vis.js adaptada a la estética requerida
-// Reemplaza esta sección de opciones dentro de tu función initNetwork()
-const options = {
-    nodes: {
-        shape: 'box',
-        // Reducimos el margen interno para que el borde abrace más el texto
-        margin: { top: 6, bottom: 6, left: 10, right: 10 }, 
-        font: {
-            face: 'Architects Daughter',
-            size: 19, // Aumentamos la tipografía para rellenar el nodo
-            multi: 'md'
-        },
-        borderWidth: 2,
-        borderWidthSelected: 4,
-        shadow: {
-            enabled: true,
-            color: 'rgba(0,0,0,0.08)',
-            size: 4,
-            x: 2,
-            y: 2
-        }
-    },
-    edges: {
-        color: {
-            color: '#2a4a8a',
-            highlight: '#1a6bb5',
-            hover: '#1a6bb5'
-        },
-        smooth: {
-            type: 'quadraticBezier',
-            roundness: 0.3
-        },
-        width: 2
-    },
-    groups: {
-        orange: {
-            background: '#FDE8C8',
-            border: '#C97B0A',
-            font: { color: '#6B3800' },
-            shapeProperties: { borderRadius: 6 }
-        },
-        blue: {
-            background: '#C8DDF5',
-            border: '#1A6BB5',
-            font: { color: '#0A2F60' },
-            shapeProperties: { borderRadius: 6 }
-        },
-        green: {
-            background: '#C8E6C4',
-            border: '#2E7A2C',
-            font: { color: '#133D12' },
-            shapeProperties: { borderRadius: 6 }
-        },
-        purple: {
-            background: '#DDD5F0',
-            border: '#6035A8',
-            font: { color: '#301768' },
-            shapeProperties: { borderRadius: 6 }
-        },
-        outline: {
-            background: 'rgba(255,255,255,0.92)',
-            border: '#1A6BB5',
-            font: { color: '#0A2F60' },
-            shapeProperties: { borderRadius: 6 }
-        },
-        empty: {
-            background: 'rgba(255,255,255,0.92)',
-            border: '#888888',
-            font: { color: '#333333' },
-            shapeProperties: { borderRadius: 6 }
-        }
-    },
-    interaction: {
-        hover: true,
-        dragNodes: true,
-        zoomView: true,
-        dragView: true
-    },
-    physics: {
-        enabled: true,
-        barnesHut: {
-            gravitationalConstant: -2500,
-            centralGravity: 0.2,
-            springLength: 140,
-            springConstant: 0.04,
-            damping: 0.09,
-            avoidOverlap: 1
-        },
-        stabilization: {
-            enabled: true,
-            iterations: 100
-        }
-    }
-};
+            const options = {
+                nodes: {
+                    shape: 'box',
+                    margin: { top: 6, bottom: 6, left: 10, right: 10 }, 
+                    font: {
+                        face: 'Architects Daughter',
+                        size: 19, // Ajustado para rellenar el cuadro
+                        multi: 'md'
+                    },
+                    borderWidth: 2,
+                    borderWidthSelected: 4,
+                    shadow: {
+                        enabled: true,
+                        color: 'rgba(0,0,0,0.06)',
+                        size: 3,
+                        x: 2,
+                        y: 2
+                    }
+                },
+                edges: {
+                    color: { color: '#2a4a8a', highlight: '#1a6bb5', hover: '#1a6bb5' },
+                    smooth: { type: 'quadraticBezier', roundness: 0.3 },
+                    width: 2
+                },
+                groups: {
+                    orange: { background: '#FDE8C8', border: '#C97B0A', font: { color: '#6B3800' }, shapeProperties: { borderRadius: 6 } },
+                    blue: { background: '#C8DDF5', border: '#1A6BB5', font: { color: '#0A2F60' }, shapeProperties: { borderRadius: 6 } },
+                    green: { background: '#C8E6C4', border: '#2E7A2C', font: { color: '#133D12' }, shapeProperties: { borderRadius: 6 } },
+                    purple: { background: '#DDD5F0', border: '#6035A8', font: { color: '#301768' }, shapeProperties: { borderRadius: 6 } },
+                    outline: { background: 'rgba(255,255,255,0.92)', border: '#1A6BB5', font: { color: '#0A2F60' }, shapeProperties: { borderRadius: 6 } },
+                    empty: { background: 'rgba(255,255,255,0.92)', border: '#888888', font: { color: '#333333' }, shapeProperties: { borderRadius: 6 } }
+                },
+                interaction: { hover: true, dragNodes: true, zoomView: true, dragView: true },
+                physics: {
+                    enabled: true,
+                    barnesHut: {
+                        gravitationalConstant: -2000,
+                        centralGravity: 0.15,
+                        springLength: 130,
+                        springConstant: 0.05,
+                        damping: 0.1,
+                        avoidOverlap: 1
+                    },
+                    stabilization: {
+                        enabled: true,
+                        iterations: 150,
+                        updateInterval: 25
+                    }
+                }
+            };
 
-            // Inicializar la red interactiva
             network = new vis.Network(container, data, options);
             updateCounter();
 
-            // Evento Click para la Lógica de Aparición Progresiva
+            // EVENTO CLAVE: Detiene la simulación física cuando los nodos se acomodan para que queden estáticos
+            network.on("stabilizationIterationsDone", function () {
+                network.setOptions({ physics: false });
+            });
+
             network.on("click", function (params) {
                 if (params.nodes.length > 0) {
                     const clickedNodeId = params.nodes[0];
@@ -329,26 +286,19 @@ const options = {
             });
         }
 
-        // Función para descubrir los nodos conectados dinámicamente
         function revealNeighbors(nodeId) {
             let changesMade = false;
 
+            // Volvemos a encender las físicas temporalmente para que el nuevo nodo encuentre su lugar ideal sin colisionar
+            network.setOptions({ physics: { enabled: true } });
+
             rawEdges.forEach(edge => {
                 let targetId = null;
-                
-                // Si el nodo clickeado es el origen ("from"), descubrimos el destino ("to")
-                if (edge.from === nodeId) {
-                    targetId = edge.to;
-                }
-                // Si el nodo clickeado es el destino ("to"), descubrimos el origen ("from") por bidireccionalidad de exploración
-                else if (edge.to === nodeId) {
-                    targetId = edge.from;
-                }
+                if (edge.from === nodeId) targetId = edge.to;
+                else if (edge.to === nodeId) targetId = edge.from;
 
                 if (targetId && !visibleNodeIds.has(targetId)) {
                     visibleNodeIds.add(targetId);
-                    
-                    // Traer la configuración del nodo desde la base maestra
                     const nodeData = rawNodes.find(n => n.id === targetId);
                     if (nodeData) {
                         nodesDataSet.add(nodeData);
@@ -357,19 +307,21 @@ const options = {
                 }
             });
 
-            // Si se agregaron nuevos nodos, actualizamos los edges que deben renderizarse entre los nodos ahora visibles
             if (changesMade) {
                 rawEdges.forEach(edge => {
                     if (visibleNodeIds.has(edge.from) && visibleNodeIds.has(edge.to)) {
-                        // Evitamos duplicar conexiones ya agregadas al DataSet
-                        if (!edgesDataSet.get({
-                            filter: e => (e.from === edge.from && e.to === edge.to)
-                        }).length) {
+                        if (!edgesDataSet.get({ filter: e => (e.from === edge.from && e.to === edge.to) }).length) {
                             edgesDataSet.add(edge);
                         }
                     }
                 });
                 updateCounter();
+                
+                // Forzar una breve re-estabilización para los nuevos nodos y luego congelar de nuevo
+                network.stabilize();
+            } else {
+                // Si no hay nodos nuevos que mostrar, apagamos la física de inmediato
+                network.setOptions({ physics: false });
             }
         }
 
@@ -377,10 +329,7 @@ const options = {
             document.getElementById('counter').innerText = `Nodos descubiertos: ${visibleNodeIds.size} / 44`;
         }
 
-        // Inicializar al cargar el documento
-        window.onload = () => {
-            initNetwork();
-        };
+        window.onload = () => { initNetwork(); };
     </script>
 </body>
 </html>
