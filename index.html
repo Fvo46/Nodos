@@ -222,97 +222,99 @@
             const data = { nodes: nodesDataSet, edges: edgesDataSet };
 
             // Opciones de configuración global de Vis.js adaptada a la estética requerida
-            const options = {
-                nodes: {
-                    shape: 'box',
-                    margin: { top: 12, bottom: 12, left: 16, right: 16 }, // Padding compacto para rellenar el nodo
-                    font: {
-                        face: 'Architects Daughter',
-                        size: 17,
-                        multi: 'md'
-                    },
-                    borderWidth: 2,
-                    borderWidthSelected: 4,
-                    shadow: {
-                        enabled: true,
-                        color: 'rgba(0,0,0,0.08)',
-                        size: 4,
-                        x: 2,
-                        y: 2
-                    }
-                },
-                edges: {
-                    color: {
-                        color: '#2a4a8a',
-                        highlight: '#1a6bb5',
-                        hover: '#1a6bb5'
-                    },
-                    smooth: {
-                        type: 'quadraticBezier', // Curvas estéticas del diseño original
-                        roundness: 0.3
-                    },
-                    width: 2
-                },
-                groups: {
-                    orange: {
-                        background: '#FDE8C8',
-                        border: '#C97B0A',
-                        font: { color: '#6B3800' },
-                        shapeProperties: { borderRadius: 6 }
-                    },
-                    blue: {
-                        background: '#C8DDF5',
-                        border: '#1A6BB5',
-                        font: { color: '#0A2F60' },
-                        shapeProperties: { borderRadius: 6 }
-                    },
-                    green: {
-                        background: '#C8E6C4',
-                        border: '#2E7A2C',
-                        font: { color: '#133D12' },
-                        shapeProperties: { borderRadius: 6 }
-                    },
-                    purple: {
-                        background: '#DDD5F0',
-                        border: '#6035A8',
-                        font: { color: '#301768' },
-                        shapeProperties: { borderRadius: 6 }
-                    },
-                    outline: {
-                        background: 'rgba(255,255,255,0.92)',
-                        border: '#1A6BB5',
-                        font: { color: '#0A2F60' },
-                        shapeProperties: { borderRadius: 6 }
-                    },
-                    empty: {
-                        background: 'rgba(255,255,255,0.92)',
-                        border: '#888888',
-                        font: { color: '#333333' },
-                        shapeProperties: { borderRadius: 6 }
-                    }
-                },
-                interaction: {
-                    hover: true,
-                    dragNodes: true, // Habilitado para permitir reorganizar si el usuario quiere
-                    zoomView: true,
-                    dragView: true
-                },
-                physics: {
-                    enabled: true,
-                    barnesHut: {
-                        gravitationalConstant: -2500, // Fuerza de repulsión mutua para evitar colisiones
-                        centralGravity: 0.2,
-                        springLength: 140, // Mantiene a los hijos cerca de sus padres
-                        springConstant: 0.04,
-                        damping: 0.09,
-                        avoidOverlap: 1 // Máxima prioridad a no encimarse
-                    },
-                    stabilization: {
-                        enabled: true,
-                        iterations: 100
-                    }
-                }
-            };
+// Reemplaza esta sección de opciones dentro de tu función initNetwork()
+const options = {
+    nodes: {
+        shape: 'box',
+        // Reducimos el margen interno para que el borde abrace más el texto
+        margin: { top: 6, bottom: 6, left: 10, right: 10 }, 
+        font: {
+            face: 'Architects Daughter',
+            size: 19, // Aumentamos la tipografía para rellenar el nodo
+            multi: 'md'
+        },
+        borderWidth: 2,
+        borderWidthSelected: 4,
+        shadow: {
+            enabled: true,
+            color: 'rgba(0,0,0,0.08)',
+            size: 4,
+            x: 2,
+            y: 2
+        }
+    },
+    edges: {
+        color: {
+            color: '#2a4a8a',
+            highlight: '#1a6bb5',
+            hover: '#1a6bb5'
+        },
+        smooth: {
+            type: 'quadraticBezier',
+            roundness: 0.3
+        },
+        width: 2
+    },
+    groups: {
+        orange: {
+            background: '#FDE8C8',
+            border: '#C97B0A',
+            font: { color: '#6B3800' },
+            shapeProperties: { borderRadius: 6 }
+        },
+        blue: {
+            background: '#C8DDF5',
+            border: '#1A6BB5',
+            font: { color: '#0A2F60' },
+            shapeProperties: { borderRadius: 6 }
+        },
+        green: {
+            background: '#C8E6C4',
+            border: '#2E7A2C',
+            font: { color: '#133D12' },
+            shapeProperties: { borderRadius: 6 }
+        },
+        purple: {
+            background: '#DDD5F0',
+            border: '#6035A8',
+            font: { color: '#301768' },
+            shapeProperties: { borderRadius: 6 }
+        },
+        outline: {
+            background: 'rgba(255,255,255,0.92)',
+            border: '#1A6BB5',
+            font: { color: '#0A2F60' },
+            shapeProperties: { borderRadius: 6 }
+        },
+        empty: {
+            background: 'rgba(255,255,255,0.92)',
+            border: '#888888',
+            font: { color: '#333333' },
+            shapeProperties: { borderRadius: 6 }
+        }
+    },
+    interaction: {
+        hover: true,
+        dragNodes: true,
+        zoomView: true,
+        dragView: true
+    },
+    physics: {
+        enabled: true,
+        barnesHut: {
+            gravitationalConstant: -2500,
+            centralGravity: 0.2,
+            springLength: 140,
+            springConstant: 0.04,
+            damping: 0.09,
+            avoidOverlap: 1
+        },
+        stabilization: {
+            enabled: true,
+            iterations: 100
+        }
+    }
+};
 
             // Inicializar la red interactiva
             network = new vis.Network(container, data, options);
