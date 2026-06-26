@@ -28,10 +28,12 @@ canvas{display:block;background:#ffffff;touch-action:none}
 #modal{background:#ffffff;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;font-family:'Architects Daughter',cursive}
 #modal h2{font-size:20px;margin-bottom:0.75rem;color:#1a2740}
 #modal p{font-size:14px;color:#555;margin-bottom:1.25rem;line-height:1.6}
-#modal input{width:100%;font-size:22px;text-align:center;letter-spacing:4px;padding:10px;margin-bottom:1rem;border:2px solid #ddd;border-radius:10px;font-family:monospace;color:#222;background:#fff}
+#modal input{width:100%;font-size:18px;text-align:center;padding:10px;margin-bottom:0.75rem;border:2px solid #ddd;border-radius:10px;font-family:'Architects Daughter',cursive;color:#222;background:#fff}
 #modal .btns{display:flex;gap:10px;justify-content:center}
 #modal button{font-size:14px;padding:8px 20px}
 #modal button.primary{background:#1A6BB5;color:#fff;border-color:#1A6BB5}
+#modal button.primary:hover{background:#155a9a}
+#errMsg{color:#c0392b;font-size:13px;margin-top:6px;min-height:18px}
 </style>
 </head>
 <body>
@@ -62,16 +64,34 @@ canvas{display:block;background:#ffffff;touch-action:none}
 
 <div id="overlay">
   <div id="modal">
-    <h2>Red Integradora</h2>
-    <p>¿Sos el <strong>presentador</strong> o te unís como <strong>audiencia</strong>?</p>
-    <div class="btns">
-      <button class="primary" onclick="startPresenter()">Soy presentador</button>
-      <button onclick="showJoin()">Soy audiencia</button>
+    <div id="viewMain">
+      <h2>Red Integradora</h2>
+      <p>¿Cómo querés ingresar?</p>
+      <div class="btns">
+        <button class="primary" onclick="showPresenterForm()">Soy presentador</button>
+        <button onclick="showJoin()">Soy audiencia</button>
+      </div>
     </div>
-    <div id="joinForm" style="display:none;margin-top:1rem">
-      <p style="font-size:13px;margin-bottom:0.5rem">Ingresá el código de sesión:</p>
-      <input type="text" id="joinCode" placeholder="XXXXX" maxlength="6" style="text-transform:uppercase"/>
-      <button onclick="startAudience()" style="margin-top:8px;width:100%;background:#1A6BB5;color:#fff;border-color:#1A6BB5">Unirse</button>
+
+    <div id="viewPresenter" style="display:none">
+      <h2>Acceso presentador</h2>
+      <p>Ingresá la contraseña para continuar:</p>
+      <input type="password" id="passInput" placeholder="Contraseña…" onkeydown="if(event.key==='Enter')checkPass()"/>
+      <div id="errMsg"></div>
+      <div class="btns">
+        <button onclick="showMain()">Volver</button>
+        <button class="primary" onclick="checkPass()">Ingresar</button>
+      </div>
+    </div>
+
+    <div id="viewJoin" style="display:none">
+      <h2>Unirse como audiencia</h2>
+      <p>Ingresá el código de sesión que te compartió el presentador:</p>
+      <input type="text" id="joinCode" placeholder="Ej: AB3KZ" maxlength="6" style="text-transform:uppercase;letter-spacing:4px;font-size:22px;font-family:monospace" onkeydown="if(event.key==='Enter')startAudience()"/>
+      <div class="btns" style="margin-top:0.75rem">
+        <button onclick="showMain()">Volver</button>
+        <button class="primary" onclick="startAudience()">Unirse</button>
+      </div>
     </div>
   </div>
 </div>
@@ -79,7 +99,6 @@ canvas{display:block;background:#ffffff;touch-action:none}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyCwjw1FmwUQ0ZEv-wCAaGoRJi3eXSDDmok",
   authDomain: "nodos-8b81e.firebaseapp.com",
@@ -89,7 +108,6 @@ const firebaseConfig = {
   messagingSenderId: "36302586707",
   appId: "1:36302586707:web:190d5ee297a308aa4f57a6"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 window._fbSet = (path, data) => set(ref(db, path), data);
@@ -102,9 +120,9 @@ window.dispatchEvent(new Event('fbready'));
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let sc=1, ox=0, oy=0, drag=null, pan=false, ps=null;
-let audience = false;
-let sessionCode = '';
-let pushTimer = null;
+let audience=false, sessionCode='', pushTimer=null;
+
+const PASS = 'mundial';
 
 const CLR = {
   orange: {f:'#FDE8C8', s:'#C97B0A', t:'#6B3800'},
@@ -116,7 +134,6 @@ const CLR = {
 };
 
 function nd(id,x,y,w,h,label,color){return{id,x,y,w,h,label,color};}
-
 const NODES=[
   nd('titulo',      100,  30, 380,  52,'Tecnologías y sociedad','_title'),
   nd('tec',         100, 120, 190,  56,'Tecnologia','orange'),
@@ -184,61 +201,50 @@ const EDGES=[
   ['intextens','construc'],['sueño','teccomo'],
 ];
 
-function resize(){
-  cv.width  = cv.parentElement.clientWidth;
-  cv.height = cv.parentElement.clientHeight;
-  rv();
-}
-window.addEventListener('resize', resize);
+function resize(){cv.width=cv.parentElement.clientWidth;cv.height=cv.parentElement.clientHeight;rv();}
+window.addEventListener('resize',resize);
 
-function ctr(n){return{x:n.x+n.w/2, y:n.y+n.h/2};}
-
+function ctr(n){return{x:n.x+n.w/2,y:n.y+n.h/2};}
 function edgePts(a,b){
-  const ac=ctr(a), bc=ctr(b);
-  const dx=bc.x-ac.x, dy=bc.y-ac.y, len=Math.sqrt(dx*dx+dy*dy);
+  const ac=ctr(a),bc=ctr(b);
+  const dx=bc.x-ac.x,dy=bc.y-ac.y,len=Math.sqrt(dx*dx+dy*dy);
   if(len<1)return null;
-  const ux=dx/len, uy=dy/len, pad=12;
+  const ux=dx/len,uy=dy/len,pad=12;
   const t1=Math.min((a.w/2+pad)/Math.max(Math.abs(ux),0.01),(a.h/2+pad)/Math.max(Math.abs(uy),0.01));
   const t2=Math.min((b.w/2+pad)/Math.max(Math.abs(ux),0.01),(b.h/2+pad)/Math.max(Math.abs(uy),0.01));
-  return{sx:ac.x+ux*t1, sy:ac.y+uy*t1, ex:bc.x-ux*t2, ey:bc.y-uy*t2, ux, uy};
+  return{sx:ac.x+ux*t1,sy:ac.y+uy*t1,ex:bc.x-ux*t2,ey:bc.y-uy*t2,ux,uy};
 }
-
 function wrapL(text,maxW){
-  const raw=text.split('\n'), out=[];
+  const raw=text.split('\n'),out=[];
   for(const line of raw){
     if(ctx.measureText(line).width<=maxW){out.push(line);continue;}
-    const ws=line.split(' '); let cur='';
-    for(const w of ws){
-      const t=cur?cur+' '+w:w;
-      if(ctx.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}
-      else cur=t;
-    }
+    const ws=line.split(' ');let cur='';
+    for(const w of ws){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}else cur=t;}
     if(cur)out.push(cur);
   }
   return out;
 }
-
 function drawNode(n){
   if(n.color==='_title'){
     const fs=Math.round(22*sc);
     ctx.font=`${fs}px 'Architects Daughter',cursive`;
-    ctx.fillStyle='#1a2740'; ctx.textAlign='left'; ctx.textBaseline='middle';
-    const tx=n.x*sc+ox, ty=(n.y+n.h/2)*sc+oy;
+    ctx.fillStyle='#1a2740';ctx.textAlign='left';ctx.textBaseline='middle';
+    const tx=n.x*sc+ox,ty=(n.y+n.h/2)*sc+oy;
     ctx.fillText(n.label,tx,ty);
     const tw=ctx.measureText(n.label).width;
-    ctx.beginPath(); ctx.moveTo(tx,ty+15*sc); ctx.lineTo(tx+tw,ty+15*sc);
-    ctx.strokeStyle='#1a2740'; ctx.lineWidth=2; ctx.stroke();
+    ctx.beginPath();ctx.moveTo(tx,ty+15*sc);ctx.lineTo(tx+tw,ty+15*sc);
+    ctx.strokeStyle='#1a2740';ctx.lineWidth=2;ctx.stroke();
     return;
   }
-  const wx=n.x*sc+ox, wy=n.y*sc+oy, ww=n.w*sc, wh=n.h*sc;
+  const wx=n.x*sc+ox,wy=n.y*sc+oy,ww=n.w*sc,wh=n.h*sc;
   const c=CLR[n.color];
   const r=Math.min(14*sc,wh/2);
-  ctx.beginPath(); ctx.roundRect(wx,wy,ww,wh,r);
-  ctx.fillStyle=c.f; ctx.fill();
-  ctx.strokeStyle=c.s; ctx.lineWidth=2; ctx.stroke();
+  ctx.beginPath();ctx.roundRect(wx,wy,ww,wh,r);
+  ctx.fillStyle=c.f;ctx.fill();
+  ctx.strokeStyle=c.s;ctx.lineWidth=2;ctx.stroke();
   const fsize=Math.max(11,Math.round(14*sc));
   ctx.font=`${fsize}px 'Architects Daughter',cursive`;
-  ctx.fillStyle=c.t; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle=c.t;ctx.textAlign='center';ctx.textBaseline='middle';
   const pad=16*sc;
   const lines=wrapL(n.label,ww-pad*2);
   const lh=Math.round(fsize*1.28);
@@ -246,101 +252,86 @@ function drawNode(n){
   const sy=wy+wh/2-totalH/2;
   lines.forEach((l,i)=>ctx.fillText(l,wx+ww/2,sy+i*lh));
 }
-
 function drawArrow(sx,sy,ex,ey,ux,uy){
-  const al=9*sc, aw=4.5*sc;
-  const ssx=sx*sc+ox, ssy=sy*sc+oy, eex=ex*sc+ox, eey=ey*sc+oy;
-  ctx.beginPath(); ctx.moveTo(ssx,ssy); ctx.lineTo(eex,eey);
-  ctx.strokeStyle='#1a3a6b'; ctx.lineWidth=1.5; ctx.stroke();
+  const al=9*sc,aw=4.5*sc;
+  const ssx=sx*sc+ox,ssy=sy*sc+oy,eex=ex*sc+ox,eey=ey*sc+oy;
+  ctx.beginPath();ctx.moveTo(ssx,ssy);ctx.lineTo(eex,eey);
+  ctx.strokeStyle='#1a3a6b';ctx.lineWidth=1.5;ctx.stroke();
   ctx.beginPath();
   ctx.moveTo(eex,eey);
-  ctx.lineTo(eex-al*ux+aw*uy, eey-al*uy-aw*ux);
-  ctx.lineTo(eex-al*ux-aw*uy, eey-al*uy+aw*ux);
-  ctx.closePath(); ctx.fillStyle='#1a3a6b'; ctx.fill();
+  ctx.lineTo(eex-al*ux+aw*uy,eey-al*uy-aw*ux);
+  ctx.lineTo(eex-al*ux-aw*uy,eey-al*uy+aw*ux);
+  ctx.closePath();ctx.fillStyle='#1a3a6b';ctx.fill();
 }
-
 function draw(){
   ctx.clearRect(0,0,cv.width,cv.height);
   for(const [aid,bid] of EDGES){
-    const a=NODES.find(n=>n.id===aid), b=NODES.find(n=>n.id===bid);
+    const a=NODES.find(n=>n.id===aid),b=NODES.find(n=>n.id===bid);
     if(!a||!b)continue;
     const ep=edgePts(a,b);
     if(ep)drawArrow(ep.sx,ep.sy,ep.ex,ep.ey,ep.ux,ep.uy);
   }
   for(const n of NODES)drawNode(n);
 }
-
 function hit(px,py){
   for(let i=NODES.length-1;i>=0;i--){
-    const n=NODES[i]; if(n.color==='_title')continue;
-    const nx=n.x*sc+ox, ny=n.y*sc+oy;
+    const n=NODES[i];if(n.color==='_title')continue;
+    const nx=n.x*sc+ox,ny=n.y*sc+oy;
     if(px>=nx&&px<=nx+n.w*sc&&py>=ny&&py<=ny+n.h*sc)return n;
   }
   return null;
 }
-
 function gp(e){
-  const r=cv.getBoundingClientRect(), sw=cv.width/r.width, sh=cv.height/r.height;
+  const r=cv.getBoundingClientRect(),sw=cv.width/r.width,sh=cv.height/r.height;
   const src=e.touches?e.touches[0]:e;
-  return{x:(src.clientX-r.left)*sw, y:(src.clientY-r.top)*sh};
+  return{x:(src.clientX-r.left)*sw,y:(src.clientY-r.top)*sh};
 }
-
 cv.addEventListener('mousedown',e=>{
   if(audience)return;
-  const{x,y}=gp(e); const n=hit(x,y);
-  if(n){drag={nd:n,ox:x-n.x*sc-ox,oy:y-n.y*sc-oy}; cv.style.cursor='grabbing';}
-  else{pan=true; ps={x,y,ox,oy}; cv.style.cursor='grab';}
+  const{x,y}=gp(e);const n=hit(x,y);
+  if(n){drag={nd:n,ox:x-n.x*sc-ox,oy:y-n.y*sc-oy};cv.style.cursor='grabbing';}
+  else{pan=true;ps={x,y,ox,oy};cv.style.cursor='grab';}
 });
 cv.addEventListener('mousemove',e=>{
   const{x,y}=gp(e);
-  if(drag){drag.nd.x=(x-drag.ox-ox)/sc; drag.nd.y=(y-drag.oy-oy)/sc; draw(); schedulePush();}
-  else if(pan){ox=ps.ox+(x-ps.x); oy=ps.oy+(y-ps.y); draw();}
+  if(drag){drag.nd.x=(x-drag.ox-ox)/sc;drag.nd.y=(y-drag.oy-oy)/sc;draw();schedulePush();}
+  else if(pan){ox=ps.ox+(x-ps.x);oy=ps.oy+(y-ps.y);draw();}
 });
-cv.addEventListener('mouseup',()=>{drag=null; pan=false; cv.style.cursor='default'; pushNow();});
-cv.addEventListener('mouseleave',()=>{drag=null; pan=false;});
-cv.addEventListener('wheel',e=>{e.preventDefault(); zm(e.deltaY<0?1.1:0.91);},{passive:false});
+cv.addEventListener('mouseup',()=>{drag=null;pan=false;cv.style.cursor='default';pushNow();});
+cv.addEventListener('mouseleave',()=>{drag=null;pan=false;});
+cv.addEventListener('wheel',e=>{e.preventDefault();zm(e.deltaY<0?1.1:0.91);},{passive:false});
 cv.addEventListener('touchstart',e=>{
-  e.preventDefault();
-  if(audience)return;
-  const{x,y}=gp(e); const n=hit(x,y);
+  e.preventDefault();if(audience)return;
+  const{x,y}=gp(e);const n=hit(x,y);
   if(n)drag={nd:n,ox:x-n.x*sc-ox,oy:y-n.y*sc-oy};
-  else{pan=true; ps={x,y,ox,oy};}
+  else{pan=true;ps={x,y,ox,oy};}
 },{passive:false});
 cv.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  const{x,y}=gp(e);
-  if(drag){drag.nd.x=(x-drag.ox-ox)/sc; drag.nd.y=(y-drag.oy-oy)/sc; draw(); schedulePush();}
-  else if(pan){ox=ps.ox+(x-ps.x); oy=ps.oy+(y-ps.y); draw();}
+  e.preventDefault();const{x,y}=gp(e);
+  if(drag){drag.nd.x=(x-drag.ox-ox)/sc;drag.nd.y=(y-drag.oy-oy)/sc;draw();schedulePush();}
+  else if(pan){ox=ps.ox+(x-ps.x);oy=ps.oy+(y-ps.y);draw();}
 },{passive:false});
-cv.addEventListener('touchend',()=>{drag=null; pan=false; pushNow();});
+cv.addEventListener('touchend',()=>{drag=null;pan=false;pushNow();});
 
-function zm(f){
-  const cx=cv.width/2, cy=cv.height/2;
-  ox=(ox-cx)*f+cx; oy=(oy-cy)*f+cy; sc*=f; draw();
-}
+function zm(f){const cx=cv.width/2,cy=cv.height/2;ox=(ox-cx)*f+cx;oy=(oy-cy)*f+cy;sc*=f;draw();}
 function rv(){
-  const W=1900, H=1000;
-  const sx=cv.width/W, sy=cv.height/H;
+  const W=1900,H=1000,sx=cv.width/W,sy=cv.height/H;
   sc=Math.min(sx,sy)*0.88;
-  ox=(cv.width-W*sc)/2; oy=(cv.height-H*sc)/2;
-  draw();
+  ox=(cv.width-W*sc)/2;oy=(cv.height-H*sc)/2;draw();
 }
 
-function schedulePush(){
-  clearTimeout(pushTimer);
-  pushTimer=setTimeout(pushNow,80);
-}
+function schedulePush(){clearTimeout(pushTimer);pushTimer=setTimeout(pushNow,80);}
 function pushNow(){
   if(audience||!sessionCode||!window._fbSet)return;
-  const positions={};
-  NODES.forEach(n=>{if(n.color!=='_title')positions[n.id]={x:n.x,y:n.y};});
-  window._fbSet('sessions/'+sessionCode+'/positions', positions).catch(()=>{});
+  const pos={};
+  NODES.forEach(n=>{if(n.color!=='_title')pos[n.id]={x:n.x,y:n.y};});
+  window._fbSet('sessions/'+sessionCode+'/positions',pos).catch(()=>{});
 }
 function listenSession(code){
   if(!window._fbOn)return;
-  window._fbOn('sessions/'+code+'/positions', data=>{
+  window._fbOn('sessions/'+code+'/positions',data=>{
     if(!data||!audience)return;
-    NODES.forEach(n=>{if(data[n.id]){n.x=data[n.id].x; n.y=data[n.id].y;}});
+    NODES.forEach(n=>{if(data[n.id]){n.x=data[n.id].x;n.y=data[n.id].y;}});
     draw();
   });
 }
@@ -355,8 +346,8 @@ function toggleRole(){
 function cpCode(){
   if(!sessionCode)return;
   navigator.clipboard?.writeText(sessionCode);
-  const el=document.getElementById('sc'), orig=el.textContent;
-  el.textContent='¡Copiado!'; setTimeout(()=>el.textContent=orig,1200);
+  const el=document.getElementById('sc'),orig=el.textContent;
+  el.textContent='¡Copiado!';setTimeout(()=>el.textContent=orig,1200);
 }
 function joinS(){
   const code=document.getElementById('ji').value.toUpperCase().trim();
@@ -368,6 +359,36 @@ function joinS(){
   document.getElementById('syncbdg').className='bdg bs';
   listenSession(code);
 }
+
+/* ── Modal navigation ── */
+function showMain(){
+  document.getElementById('viewMain').style.display='block';
+  document.getElementById('viewPresenter').style.display='none';
+  document.getElementById('viewJoin').style.display='none';
+  document.getElementById('errMsg').textContent='';
+}
+function showPresenterForm(){
+  document.getElementById('viewMain').style.display='none';
+  document.getElementById('viewPresenter').style.display='block';
+  document.getElementById('passInput').value='';
+  document.getElementById('errMsg').textContent='';
+  setTimeout(()=>document.getElementById('passInput').focus(),100);
+}
+function showJoin(){
+  document.getElementById('viewMain').style.display='none';
+  document.getElementById('viewJoin').style.display='block';
+  setTimeout(()=>document.getElementById('joinCode').focus(),100);
+}
+function checkPass(){
+  const val=document.getElementById('passInput').value.trim().toLowerCase();
+  if(val===PASS){
+    startPresenter();
+  } else {
+    document.getElementById('errMsg').textContent='Contraseña incorrecta. Intentá de nuevo.';
+    document.getElementById('passInput').value='';
+    document.getElementById('passInput').focus();
+  }
+}
 function startPresenter(){
   sessionCode=Math.random().toString(36).substr(2,5).toUpperCase();
   document.getElementById('sc').textContent=sessionCode;
@@ -377,10 +398,6 @@ function startPresenter(){
   document.getElementById('overlay').style.display='none';
   audience=false;
   resize();
-}
-function showJoin(){
-  document.getElementById('joinForm').style.display='block';
-  document.getElementById('joinCode').focus();
 }
 function startAudience(){
   const code=document.getElementById('joinCode').value.toUpperCase().trim();
