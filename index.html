@@ -8,27 +8,27 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Architects Daughter',cursive;background:#f5f5f0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
-#topbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:#fff;border-bottom:1px solid #ddd;flex-shrink:0}
+#topbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:#ffffff;border-bottom:1px solid #ddd;flex-shrink:0}
 .bdg{font-size:13px;padding:4px 12px;border-radius:20px;font-weight:700;font-family:'Architects Daughter',cursive}
 .bp{background:#E6F1FB;color:#0C447C}
 .ba{background:#EAF3DE;color:#27500A}
 .bw{background:#FAEEDA;color:#633806}
 .bs{background:#D4EDDA;color:#155724}
 .sep{width:1px;height:22px;background:#ddd}
-button{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 12px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer}
+button{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 12px;border:1px solid #ccc;border-radius:8px;background:#ffffff;cursor:pointer;color:#222}
 button:hover{background:#f0f0f0}
-input{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:8px}
-#canvas-wrap{flex:1;overflow:hidden;position:relative}
-canvas{display:block;background:#fff;touch-action:none}
-#bottombar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 12px;background:#fff;border-top:1px solid #ddd;flex-shrink:0}
+input{font-family:'Architects Daughter',cursive;font-size:13px;padding:5px 8px;border:1px solid #ccc;border-radius:8px;color:#222;background:#fff}
+#canvas-wrap{flex:1;overflow:hidden;position:relative;background:#ffffff}
+canvas{display:block;background:#ffffff;touch-action:none}
+#bottombar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 12px;background:#ffffff;border-top:1px solid #ddd;flex-shrink:0}
 .sbox{font-size:12px;color:#666;padding:4px 10px;border:1px solid #ddd;border-radius:8px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:#fafafa}
 .sbox b{font-family:monospace;letter-spacing:1px;color:#222}
 #status{font-size:12px;color:#888;margin-left:auto}
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:100}
-#modal{background:#fff;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;font-family:'Architects Daughter',cursive}
+#modal{background:#ffffff;border-radius:16px;padding:2rem;max-width:380px;width:90%;text-align:center;font-family:'Architects Daughter',cursive}
 #modal h2{font-size:20px;margin-bottom:0.75rem;color:#1a2740}
 #modal p{font-size:14px;color:#555;margin-bottom:1.25rem;line-height:1.6}
-#modal input{width:100%;font-size:22px;text-align:center;letter-spacing:4px;padding:10px;margin-bottom:1rem;border:2px solid #ddd;border-radius:10px;font-family:monospace}
+#modal input{width:100%;font-size:22px;text-align:center;letter-spacing:4px;padding:10px;margin-bottom:1rem;border:2px solid #ddd;border-radius:10px;font-family:monospace;color:#222;background:#fff}
 #modal .btns{display:flex;gap:10px;justify-content:center}
 #modal button{font-size:14px;padding:8px 20px}
 #modal button.primary{background:#1A6BB5;color:#fff;border-color:#1A6BB5}
@@ -54,13 +54,12 @@ canvas{display:block;background:#fff;touch-action:none}
 
 <div id="bottombar">
   <div class="sbox" onclick="cpCode()">Sesión: <b id="sc">----</b> 📋</div>
-  <span style="font-size:12px;color:#888">o unirse:</span>
+  <span style="font-size:12px;color:#888">unirse:</span>
   <input type="text" id="ji" placeholder="Código…" style="width:90px" maxlength="6"/>
   <button onclick="joinS()">Unirse →</button>
   <span id="status">Iniciando…</span>
 </div>
 
-<!-- Modal inicio -->
 <div id="overlay">
   <div id="modal">
     <h2>Red Integradora</h2>
@@ -77,7 +76,6 @@ canvas{display:block;background:#fff;touch-action:none}
   </div>
 </div>
 
-<!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -94,7 +92,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 window._fbSet = (path, data) => set(ref(db, path), data);
 window._fbOn  = (path, cb)   => onValue(ref(db, path), snap => cb(snap.val()));
 window._fbReady = true;
@@ -109,14 +106,13 @@ let audience = false;
 let sessionCode = '';
 let pushTimer = null;
 
-/* ── Colores ── */
 const CLR = {
   orange: {f:'#FDE8C8', s:'#C97B0A', t:'#6B3800'},
   blue:   {f:'#C8DDF5', s:'#1A6BB5', t:'#0A2F60'},
   green:  {f:'#C8E6C4', s:'#2E7A2C', t:'#133D12'},
   purple: {f:'#DDD5F0', s:'#6035A8', t:'#301768'},
-  outline:{f:'rgba(255,255,255,0.05)', s:'#1A6BB5', t:'#0A2F60'},
-  empty:  {f:'rgba(255,255,255,0.05)', s:'#777', t:'#222'},
+  outline:{f:'rgba(255,255,255,0.9)', s:'#1A6BB5', t:'#0A2F60'},
+  empty:  {f:'rgba(255,255,255,0.9)', s:'#777', t:'#333'},
 };
 
 function nd(id,x,y,w,h,label,color){return{id,x,y,w,h,label,color};}
@@ -188,7 +184,6 @@ const EDGES=[
   ['intextens','construc'],['sueño','teccomo'],
 ];
 
-/* ── Canvas ── */
 function resize(){
   cv.width  = cv.parentElement.clientWidth;
   cv.height = cv.parentElement.clientHeight;
@@ -199,7 +194,7 @@ window.addEventListener('resize', resize);
 function ctr(n){return{x:n.x+n.w/2, y:n.y+n.h/2};}
 
 function edgePts(a,b){
-  const ac=ctr(a),bc=ctr(b);
+  const ac=ctr(a), bc=ctr(b);
   const dx=bc.x-ac.x, dy=bc.y-ac.y, len=Math.sqrt(dx*dx+dy*dy);
   if(len<1)return null;
   const ux=dx/len, uy=dy/len, pad=12;
@@ -212,7 +207,7 @@ function wrapL(text,maxW){
   const raw=text.split('\n'), out=[];
   for(const line of raw){
     if(ctx.measureText(line).width<=maxW){out.push(line);continue;}
-    const ws=line.split(' ');let cur='';
+    const ws=line.split(' '); let cur='';
     for(const w of ws){
       const t=cur?cur+' '+w:w;
       if(ctx.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}
@@ -331,32 +326,25 @@ function rv(){
   draw();
 }
 
-/* ── Firebase sync ── */
 function schedulePush(){
   clearTimeout(pushTimer);
-  pushTimer=setTimeout(pushNow, 80);
+  pushTimer=setTimeout(pushNow,80);
 }
-
 function pushNow(){
   if(audience||!sessionCode||!window._fbSet)return;
   const positions={};
-  NODES.forEach(n=>{ if(n.color!=='_title') positions[n.id]={x:n.x,y:n.y}; });
-  window._fbSet('sessions/'+sessionCode+'/positions', positions)
-    .catch(()=>{});
+  NODES.forEach(n=>{if(n.color!=='_title')positions[n.id]={x:n.x,y:n.y};});
+  window._fbSet('sessions/'+sessionCode+'/positions', positions).catch(()=>{});
 }
-
 function listenSession(code){
   if(!window._fbOn)return;
   window._fbOn('sessions/'+code+'/positions', data=>{
     if(!data||!audience)return;
-    NODES.forEach(n=>{
-      if(data[n.id]){n.x=data[n.id].x; n.y=data[n.id].y;}
-    });
+    NODES.forEach(n=>{if(data[n.id]){n.x=data[n.id].x; n.y=data[n.id].y;}});
     draw();
   });
 }
 
-/* ── UI ── */
 function toggleRole(){
   audience=!audience;
   document.getElementById('rbdg').textContent=audience?'Audiencia':'Presentador';
@@ -364,19 +352,12 @@ function toggleRole(){
   document.getElementById('btnR').textContent=audience?'🎤 Modo presentador':'👁 Modo audiencia';
   cv.style.cursor='default';
 }
-
-function zm(f){
-  const cx=cv.width/2, cy=cv.height/2;
-  ox=(ox-cx)*f+cx; oy=(oy-cy)*f+cy; sc*=f; draw();
-}
-
 function cpCode(){
   if(!sessionCode)return;
   navigator.clipboard?.writeText(sessionCode);
   const el=document.getElementById('sc'), orig=el.textContent;
   el.textContent='¡Copiado!'; setTimeout(()=>el.textContent=orig,1200);
 }
-
 function joinS(){
   const code=document.getElementById('ji').value.toUpperCase().trim();
   if(!code)return;
@@ -387,8 +368,6 @@ function joinS(){
   document.getElementById('syncbdg').className='bdg bs';
   listenSession(code);
 }
-
-/* ── Modal ── */
 function startPresenter(){
   sessionCode=Math.random().toString(36).substr(2,5).toUpperCase();
   document.getElementById('sc').textContent=sessionCode;
@@ -399,12 +378,10 @@ function startPresenter(){
   audience=false;
   resize();
 }
-
 function showJoin(){
   document.getElementById('joinForm').style.display='block';
   document.getElementById('joinCode').focus();
 }
-
 function startAudience(){
   const code=document.getElementById('joinCode').value.toUpperCase().trim();
   if(!code){alert('Ingresá el código de sesión');return;}
@@ -422,16 +399,14 @@ function startAudience(){
   listenSession(code);
 }
 
-/* ── Init ── */
 function init(){
   document.getElementById('syncbdg').textContent='● Firebase listo';
   document.getElementById('syncbdg').className='bdg bs';
 }
+if(window._fbReady){init();}
+else{window.addEventListener('fbready',init);}
 
-if(window._fbReady){ init(); }
-else{ window.addEventListener('fbready', init); }
-
-document.fonts.ready.then(()=>{ if(cv.width>0)draw(); });
+document.fonts.ready.then(()=>{if(cv.width>0)draw();});
 </script>
 </body>
 </html>
