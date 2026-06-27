@@ -6,7 +6,7 @@
   <title>Tecnologías y sociedad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dekko&display=swap" rel="stylesheet">
   <link href="https://unpkg.com/vis-network@9.1.9/styles/vis-network.min.css" rel="stylesheet">
   <style>
     :root {
@@ -22,7 +22,7 @@
       height: 100%;
       margin: 0;
       overflow: hidden;
-      font-family: "Architects Daughter", cursive;
+      font-family: "Dekko", cursive;
       font-weight: 700;
       color: var(--ink);
       background-color: #2a3d2a;
@@ -82,7 +82,7 @@
       background: rgba(42,61,42,0.88);
       color: #d4e8d4;
       box-shadow: 0 4px 14px rgba(0,0,0,0.35);
-      font: 700 20px/1 "Architects Daughter", cursive;
+      font: 700 20px/1 "Dekko", cursive;
       cursor: pointer;
     }
 
@@ -180,7 +180,7 @@
       justify-content: center;
       box-shadow: 0 4px 14px rgba(0,0,0,0.35);
       transition: background 0.2s;
-      font-family: "Architects Daughter", cursive;
+      font-family: "Dekko", cursive;
     }
     .legend-toggle:hover { background: rgba(60,85,60,0.95); }
 
@@ -470,9 +470,9 @@
           label: function(values) { values.mod = "bold"; }
         },
         font: {
-          face: "Architects Daughter",
+          face: "Dekko",
           size: 24,
-          bold: { face: "Architects Daughter", size: 24, mod: "bold" },
+          bold: { face: "Dekko", size: 24, mod: "bold" },
           multi: true,
           vadjust: 0
         },
@@ -727,7 +727,7 @@
     // Mobile: show pinch hint briefly on first load
     if ('ontouchstart' in window) {
       var mobileHint = document.createElement('div');
-      mobileHint.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(30,46,30,0.88);color:#d4e8d4;padding:8px 18px;border-radius:16px;font:700 14px "Architects Daughter",cursive;pointer-events:none;z-index:10;white-space:nowrap;transition:opacity 1s;';
+      mobileHint.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(30,46,30,0.88);color:#d4e8d4;padding:8px 18px;border-radius:16px;font:700 14px "Dekko",cursive;pointer-events:none;z-index:10;white-space:nowrap;transition:opacity 1s;';
       mobileHint.textContent = 'Pellizco para zoom · Doble tap para encuadrar';
       document.body.appendChild(mobileHint);
       setTimeout(function() { mobileHint.style.opacity = '0'; }, 3500);
